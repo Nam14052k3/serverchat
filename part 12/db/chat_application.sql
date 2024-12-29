@@ -1,4 +1,4 @@
-/*
+﻿/*
 Navicat MySQL Data Transfer
 
 Source Server         : SEVER 3305
@@ -13,15 +13,28 @@ File Encoding         : 65001
 Date: 2021-06-15 00:27:33
 */
 
-SET FOREIGN_KEY_CHECKS=0;
+SET NOCOUNT ON;
 
--- ----------------------------
--- Table structure for user
--- ----------------------------
-DROP TABLE IF EXISTS `user`;
-CREATE TABLE `user` (
-  `UserID` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `UserName` varchar(255) DEFAULT NULL,
-  `Password` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`UserID`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+-- Xóa bảng nếu đã tồn tại
+IF OBJECT_ID('user', 'U') IS NOT NULL
+    DROP TABLE [user];
+
+-- Tạo bảng user
+CREATE TABLE [user] (
+    [UserID] INT NOT NULL IDENTITY(1,1),
+    [UserName] NVARCHAR(255) NULL,
+    [Password] NVARCHAR(255) NULL,
+    PRIMARY KEY ([UserID])
+);
+
+-- Chèn dữ liệu vào bảng user
+INSERT INTO [user] ([UserName], [Password]) 
+VALUES 
+    ('Bob', '123'),
+    ('Charlie', 'securePass789'),
+    ('Diana', 'qwerty123');
+
+-- Truy vấn dữ liệu từ bảng user
+SELECT * FROM [user];
+
+

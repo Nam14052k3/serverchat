@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
 
 public class ServiceUser {
 
@@ -58,9 +59,11 @@ public class ServiceUser {
                 message.setMessage("Ok");
                 message.setData(new Model_User_Account(userID, data.getUserName(), "", "", true));
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             message.setAction(false);
-            message.setMessage("Server Error");
+            message.setMessage(""+e.getMessage());
+            
+            
             try {
                 if (con.getAutoCommit() == false) {
                     con.rollback();
@@ -74,7 +77,7 @@ public class ServiceUser {
 
     public Model_User_Account login(Model_Login login) throws SQLException {
         Model_User_Account data = null;
-        PreparedStatement p = con.prepareStatement(LOGIN);
+        PreparedStatement p = con.prepareStatement(query);
         p.setString(1, login.getUserName());
         p.setString(2, login.getPassword());
         ResultSet r = p.executeQuery();
@@ -84,10 +87,13 @@ public class ServiceUser {
             String gender = r.getString(3);
             String image = r.getString(4);
             data = new Model_User_Account(userID, userName, gender, image, true);
+            System.out.println("user"+userID+""+userName);
         }
         r.close();
         p.close();
+        
         return data;
+        
     }
 
     public List<Model_User_Account> getUser(int exitUser) throws SQLException {
@@ -118,11 +124,22 @@ public class ServiceUser {
     }
 
     //  SQL
-    private final String LOGIN = "select UserID, user_account.UserName, Gender, ImageString from `user` join user_account using (UserID) where `user`.UserName=BINARY(?) and `user`.`Password`=BINARY(?) and user_account.`Status`='1'";
-    private final String SELECT_USER_ACCOUNT = "select UserID, UserName, Gender, ImageString from user_account where user_account.`Status`='1' and UserID<>?";
-    private final String INSERT_USER = "insert into user (UserName, `Password`) values (?,?)";
-    private final String INSERT_USER_ACCOUNT = "insert into user_account (UserID, UserName) values (?,?)";
-    private final String CHECK_USER = "select UserID from user where UserName =? limit 1";
+    String query = "SELECT * FROM [user] WHERE Username = ? AND password = ?";
+    private final String LOGIN = "SELECT TOP 1 UserID, user_account.UserName, Gender, ImageString "+ "FROM [user] "+ "JOIN user_account ON user.UserID = user_account.UserID "
+        + "WHERE user.UserName = ? COLLATE SQL_Latin1_General_CP1_CS_AS "
+        + "AND user.[Password] = ? COLLATE SQL_Latin1_General_CP1_CS_AS "
+        + "AND user_account.[Status] = '1'";
+
+private final String SELECT_USER_ACCOUNT = "SELECT UserID, UserName, Gender, ImageString "
+        + "FROM user_account "
+        + "WHERE user_account.[Status] = '1' AND UserID <> ?";
+
+private final String INSERT_USER = "INSERT INTO [user] (UserName, [Password]) VALUES (?, ?)";
+
+private final String INSERT_USER_ACCOUNT = "INSERT INTO user_account (UserID, UserName) VALUES (?, ?)";
+
+private final String CHECK_USER = "SELECT TOP 1 UserID FROM [user] WHERE UserName = ?";
+
     //  Instance
     private final Connection con;
 }
